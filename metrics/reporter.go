@@ -36,6 +36,7 @@ type ReporterConfig struct {
 	Path               string
 	PushGatewayAddress string
 	SummaryMaxAge      int64
+	Protocol           string
 }
 
 type ReportMode string
