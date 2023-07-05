@@ -31,6 +31,9 @@ var listener = &eventListener{
 
 // Publish publishes an event to all subscribers of the same type.
 func Publish(event MetricsEvent) {
+	listener.mu.Lock()
+	defer listener.mu.Unlock()
+
 	if ch, ok := listener.listener[event.Type()]; ok {
 		select {
 		case ch <- event:
