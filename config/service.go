@@ -22,11 +22,8 @@ import (
 )
 
 import (
-	"github.com/dubbogo/gost/log/logger"
-)
-
-import (
 	"dubbo.apache.org/dubbo-go/v3/common"
+	"dubbo.apache.org/dubbo-go/v3/config_compat"
 )
 
 var (
@@ -40,24 +37,12 @@ var (
 
 // SetConsumerService is called by init() of implement of RPCService
 func SetConsumerService(service common.RPCService) {
-	ref := common.GetReference(service)
-	conServicesLock.Lock()
-	defer func() {
-		conServicesLock.Unlock()
-		logger.Debugf("A consumer service %s was registered successfully.", ref)
-	}()
-	conServices[ref] = service
+	config_compat.SetConsumerService(service)
 }
 
 // SetProviderService is called by init() of implement of RPCService
 func SetProviderService(service common.RPCService) {
-	ref := common.GetReference(service)
-	proServicesLock.Lock()
-	defer func() {
-		proServicesLock.Unlock()
-		logger.Debugf("A provider service %s was registered successfully.", ref)
-	}()
-	proServices[ref] = service
+	config_compat.SetProviderService(service)
 }
 
 // GetConsumerService gets ConsumerService by @name

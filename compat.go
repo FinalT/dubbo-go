@@ -22,7 +22,9 @@ import (
 )
 
 import (
+	"dubbo.apache.org/dubbo-go/v3/common"
 	"dubbo.apache.org/dubbo-go/v3/config"
+	"dubbo.apache.org/dubbo-go/v3/config_compat"
 	"dubbo.apache.org/dubbo-go/v3/global"
 )
 
@@ -413,4 +415,26 @@ func compatMetricPrometheusGateway(g *global.PushgatewayConfig) *config.Pushgate
 		Password:     g.Password,
 		PushInterval: g.PushInterval,
 	}
+}
+
+func init() {
+	config_compat.Load = compatLoad
+	config_compat.SetProviderService = compatSetProviderService
+	config_compat.SetConsumerService = compatSetConsumerService
+}
+
+func compatLoad(opts ...interface{}) error {
+	compatOpts := make([]LoaderConfOption, 0, len(opts))
+	for _, opt := range opts {
+		compatOpts = append(compatOpts, opt.(LoaderConfOption))
+	}
+	return Load(compatOpts...)
+}
+
+func compatSetProviderService(srv common.RPCService) {
+	SetProviderServiceWithInfo(srv, nil)
+}
+
+func compatSetConsumerService(srv common.RPCService) {
+	SetConsumerServiceWithInfo(srv, nil)
 }

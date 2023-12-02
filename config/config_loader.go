@@ -26,8 +26,6 @@ import (
 import (
 	"github.com/dubbogo/gost/log/logger"
 
-	"github.com/knadh/koanf"
-
 	perrors "github.com/pkg/errors"
 )
 
@@ -35,6 +33,7 @@ import (
 	"dubbo.apache.org/dubbo-go/v3/common"
 	"dubbo.apache.org/dubbo-go/v3/common/constant"
 	"dubbo.apache.org/dubbo-go/v3/common/extension"
+	"dubbo.apache.org/dubbo-go/v3/config_compat"
 	"dubbo.apache.org/dubbo-go/v3/logger/zap"
 	"dubbo.apache.org/dubbo-go/v3/registry"
 )
@@ -49,23 +48,7 @@ func init() {
 }
 
 func Load(opts ...LoaderConfOption) error {
-	// conf
-	conf := NewLoaderConf(opts...)
-	if conf.rc == nil {
-		koan := GetConfigResolver(conf)
-		koan = conf.MergeConfig(koan)
-		if err := koan.UnmarshalWithConf(rootConfig.Prefix(),
-			rootConfig, koanf.UnmarshalConf{Tag: "yaml"}); err != nil {
-			return err
-		}
-	} else {
-		rootConfig = conf.rc
-	}
-
-	if err := rootConfig.Init(); err != nil {
-		return err
-	}
-	return nil
+	return config_compat.Load(opts)
 }
 
 func check() error {
