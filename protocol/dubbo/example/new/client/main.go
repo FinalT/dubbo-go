@@ -28,48 +28,25 @@ import (
 import (
 	"dubbo.apache.org/dubbo-go/v3/client"
 	_ "dubbo.apache.org/dubbo-go/v3/imports"
-	health "dubbo.apache.org/dubbo-go/v3/protocol/triple/health/triple_health"
 )
 
 func main() {
 	cli, err := client.NewClient(
-		client.WithClientURL("tri://127.0.0.1:20000"),
+		client.WithClientProtocolDubbo(),
 	)
 	if err != nil {
 		panic(err)
 	}
-	svc, err := health.NewHealth(cli)
+	conn, err := cli.Dial("GreetProvider",
+		client.WithURL("127.0.0.1:20000"),
+	)
 	if err != nil {
 		panic(err)
 	}
-
-	check, err := svc.Check(context.Background(), &health.HealthCheckRequest{Service: "dubbo.health.v1.Health"})
-	if err != nil {
-		logger.Error(err)
-	} else {
-		logger.Info("dubbo.health.v1.Health's health", check.String())
+	var resp string
+	if err := conn.CallUnary(context.Background(), []interface{}{"hello", "new", "dubbo"}, &resp, "Greet"); err != nil {
+		logger.Errorf("GreetProvider.Greet err: %s", err)
+		return
 	}
-	check, err = svc.Check(context.Background(), &health.HealthCheckRequest{Service: "greet.GreetService"})
-	if err != nil {
-		logger.Error(err)
-	} else {
-		logger.Info("greet.GreetService's health", check.String())
-	}
-
-	watch, err := svc.Watch(context.Background(), &health.HealthCheckRequest{Service: "grpc.health.v1.Health"})
-	if err != nil {
-		logger.Error(err)
-	} else {
-		if watch.Recv() {
-			logger.Info("dubbo.health.v1.Health's health", watch.Msg().String())
-		}
-	}
-	watch, err = svc.Watch(context.Background(), &health.HealthCheckRequest{Service: "greet.GreetService"})
-	if err != nil {
-		logger.Error(err)
-	} else {
-		if watch.Recv() {
-			logger.Info("greet.GreetService's health", watch.Msg().String())
-		}
-	}
+	logger.Infof("Get Response: %s", resp)
 }
